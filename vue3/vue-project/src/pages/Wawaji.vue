@@ -18,7 +18,6 @@
                 <div class="zhua-zuo"></div>
                 <div class="zhua-gan ani-zhua-gan-y"></div>
                 <div class="zhua-jiazi ani-zhua-jiazi-y ani-kaihe"></div>
-
             </div>
         </div>
     </div>
@@ -33,6 +32,30 @@
  * 5、如果抓取成功，娃娃竖直向上移动，竿子竖直向上移动，抓手不再开合以中等宽度竖直移动
  * 6、弹出提示信息，然后娃娃回到原来的位置，抓手重新进行开合动画
  */
+
+ import { ref } from 'vue';
+
+ /**
+  * 确定用来逻辑判断和计算的数据有哪些？
+  * 1、娃娃的位置，用于判断是否成功抓取
+  * 2、抓手初始的位置
+  * 3、抓手左右移动后停下的位置，用于判断是否成功抓取
+  * 4、抓手停的位置，用于判断抓取的娃娃是前排还是后排
+  * 5、抓手是否处于有娃娃被抓住的状态，用于判断是否需要运行抓手开合的动画
+  * 6、
+  */
+
+  // x: 用于判断抓手左右方向的位置，y: 用于判断抓手竖直方向的位置，top: 娃娃被抓住后上移后停住的位置, isFront: 用于判断是否前排
+const wawa = [
+    {x: -134, y: 317, top: -199, isFront: false}, {x: -6, y: 317, top: -199, isFront: false}, {x: 119, y: 317, top: -199, isFront: false},
+    {x: -107, y: 387, top: -199, isFront: true}, {x: 21, y: 387, top: -199, isFront: true}, {x: 151, y: 387, top: -199, isFront: true},
+];
+const jiaziInitedX = 0; // 抓手整体的left属性的值
+const jiaziInitedY = 117; // 抓手top属性的初始值
+const jiaziStoppedX = ref(0); //
+const jiaziStoppedY = ref(117);
+const jiaziHasWawa = ref(false);
+
 </script>
 
 <style scoped>
@@ -41,7 +64,7 @@
 }
 
 .page-container {
-    @apply h-full w-[640px] bg-[url('/images/dx-bg2.jpg')] bg-no-repeat mx-auto relative;
+    @apply h-full w-[640px] bg-[url('/images/dx-bg2.jpg')] bg-no-repeat mx-auto relative overflow-hidden;
 }
 
 .poster-main {
@@ -150,7 +173,7 @@
 }
 
 .ani-zhua-x {
-    transition: left 0.3;
+    transition: left 0.3s;
 }
 
 .ani-zhua-gan-y {
