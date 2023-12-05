@@ -53,6 +53,7 @@ import { ref } from 'vue';
  */
 
 // x: 用于判断抓手左右方向的位置，y: 用于判断抓手竖直方向的位置，top: 娃娃被抓住后上移后停住的位置, isFront: 用于判断是否前排
+// 竿子的初始位置，不要和任何娃娃的位置相重合
 const wawaList = [
     { x: -134, y: 317, top: -199, isFront: false }, { x: -6, y: 317, top: -199, isFront: false }, { x: 119, y: 317, top: -199, isFront: false },
     { x: -107, y: 387, top: -199, isFront: true }, { x: 21, y: 387, top: -199, isFront: true }, { x: 151, y: 387, top: -199, isFront: true },
@@ -86,6 +87,7 @@ const handleGoClick = () => {
     if (wawaIndex.value > -1) {
         wawaIndex.value = -1;
         jiaziHasWawa.value = false;
+        jiaziStoppedX.value = jiaziInitedX;
         return;
     }
 
