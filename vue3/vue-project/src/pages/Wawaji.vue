@@ -4,26 +4,27 @@
             <div class="poster-main">
                 <ul class="poster-list">
                     <template v-for="(wawa, i) in wawaList">
+                        <!-- 这里的 i==wawaIndex ? 'begot':'' -->
+                        <!-- 表示了摆放的娃娃如果和判定被抓到的娃娃序号一致，则应用样式begot，娃娃就会向上移动 -->
                         <li class="item ani-wawa-y" :class="['lw' + (i + 1), i == wawaIndex ? 'begot' : '']">
                             <img :src="'/images/dx-lw' + (i + 1) + '.png'" alt="" />
                         </li>
                     </template>
-                    <!-- <li class="item lw1 ani-wawa-y"><img src="/images/dx-lw1.png" alt=""></li>
-                    <li class="item lw2 ani-wawa-y"><img src="/images/dx-lw2.png" alt=""></li>
-                    <li class="item lw3 ani-wawa-y"><img src="/images/dx-lw3.png" alt=""></li>
-                    <li class="item lw4 ani-wawa-y"><img src="/images/dx-lw4.png" alt=""></li>
-                    <li class="item lw5 ani-wawa-y"><img src="/images/dx-lw5.png" alt=""></li>
-                    <li class="item lw6 ani-wawa-y"><img src="/images/dx-lw6.png" alt=""></li> -->
                 </ul>
             </div>
             <div id="left" class="btn btn-left" @click="handleLeftClick"></div>
             <div id="go" class="btn btn-go" @click="handleGoClick"></div>
             <div id="right" class="btn btn-right" @click="handleRightClick"></div>
+            <!-- 这里表示整个抓手整体的div，它的left属性绑定了响应式变量，会随着变化左右移动 -->
             <div class="zhua-top ani-zhua-x" :style="{ left: jiaziStoppedX + 'px' }">
                 <div class="zhua-zuo"></div>
-                <div class="zhua-gan ani-zhua-gan-y" :style="{ height: ganStoppedHeight + 'px' }"></div>
+                <!-- 这个竿子的div的高度属性，是绑定了一个响应式变量，只要变量的值发生变化，竿子就会伸长或缩短 -->
+                <div class="zhua-gan ani-zhua-gan-y" :style="{ height: ganStoppedHeight + 'px' }">
+                </div>
+                <!-- 这个抓手的div的top属性，绑定了响应式变量，抓手会随着变化值而上下移动 -->
                 <div class="zhua-jiazi ani-zhua-jiazi-y" :class="{ gotit: jiaziHasWawa, 'ani-kaihe': !jiaziHasWawa }"
-                    :style="{ top: jiaziStoppedY + 'px' }"></div>
+                    :style="{ top: jiaziStoppedY + 'px' }">
+                </div>
             </div>
         </div>
     </div>
@@ -71,17 +72,18 @@ const ganStoppedHeight = ref(100);   // 竿子最终的高度
 const jiaziHasWawa = ref(false);  // 抓手是否夹住了娃娃
 
 const handleLeftClick = () => {
-    // 点击 左 按钮时
+    // 点击 左 按钮时，向左移动5像素
     jiaziStoppedX.value -= 5;
 }
 
 const handleRightClick = () => {
-    // 点击 右 按钮时
+    // 点击 右 按钮时，向右移动5像素
     jiaziStoppedX.value += 5;
 }
 
 const handleGoClick = () => {
-    if(wawaIndex.value > -1){
+    // 如果有娃娃被抓着，就先把娃娃放下，再让抓手开始开合动画
+    if (wawaIndex.value > -1) {
         wawaIndex.value = -1;
         jiaziHasWawa.value = false;
         return;
@@ -109,6 +111,7 @@ const handleGoClick = () => {
     // 采用循环判断娃娃，看夹子的水平和竖直方向的值是否与娃娃的位置相匹配
     let hasGotWawa = false;
     let begotIndex = -1;
+    let veryClose = false;
     for (let i = 0; i < wawaList.length; i++) {
         const v = wawaList[i];
         const isXMatch = Math.abs(v.x - jiaziStoppedX.value) < 5;
@@ -116,9 +119,18 @@ const handleGoClick = () => {
         const isYMatch = isFront ? (jiaziStoppedY.value == frontY) : (jiaziStoppedY.value == backY);
         const isFrontMatch = isFront == v.isFront;
         if (isXMatch && isYMatch && isFrontMatch) {
-            hasGotWawa = true;
-            begotIndex = i;
-            break;
+            // 如果经过判断，抓手的位置刚好和娃娃的位置相符，则可以判定成功抓到娃娃
+            // 不过，我们可以在这里也设置一个随机变量，这样，即使位置相符，也不一定能成功
+            // 不过，我们用变量记录一下，说明我们很接近。
+            const randomNum2 = Math.random();
+            if (randomNum2 > 0.5) {
+                hasGotWawa = true;
+                begotIndex = i;
+                break;
+            } else {
+                veryClose = true;
+                hasGotWawa = false;
+            }
         } else {
             hasGotWawa = false;
         }
@@ -133,17 +145,26 @@ const handleGoClick = () => {
         jiaziHasWawa.value = false;
 
         setTimeout(() => {
-            // 在800毫秒后，
+            // 在800毫秒后，抓手需要判断是否抓到娃娃而应用动画
             // 如果有抓到娃娃，抓手的开合动画会停止
             // 如果没有抓到，抓手的开合动画也会停止
             jiaziHasWawa.value = hasGotWawa;
 
+            // 然后抓手、竿子开始上升
             ganStoppedHeight.value = ganInitedHeight;
             jiaziStoppedY.value = jiaziInitedY;
+
+            // 如果有娃娃被抓到，那么娃娃也会跟着抓手上升
             wawaIndex.value = begotIndex;
 
             setTimeout(() => {
-
+                if (hasGotWawa) {
+                    alert("竟然抓到了！");
+                } else {
+                    if (veryClose) {
+                        alert("很接近，再试一次！")
+                    }
+                }
             }, 2000);
         }, 800);
     }, 2000)
@@ -178,7 +199,7 @@ const handleGoClick = () => {
         }
 
         .begot {
-            top: -199px;
+            top: -199px !important;
         }
 
         .lw1 {
